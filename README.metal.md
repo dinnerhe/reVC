@@ -28,7 +28,8 @@ the vendored-library option. Leave it empty to use the existing vendored or
 installed-library paths.
 
 Metal exposes a windowed mode followed by the primary monitor's fullscreen
-resolutions. Select display mode and MSAA through the normal graphics menu.
+resolutions, including the current scaled desktop mode even when GLFW omits it
+from its fullscreen enumeration. Select display mode and MSAA through the normal graphics menu.
 Changes restart the RenderWare engine. Camera dimensions and mouse coordinates
 use logical window pixels; Metal scales rendering to the Retina framebuffer.
 
@@ -74,7 +75,11 @@ macOS desktop terminal.
 ## Verification status
 
 The native Metal and OpenGL GLFW builds both compile and link successfully.
-The sandboxed desktop launch and both Metal GPU suites are blocked by macOS
-desktop-service access: `com.apple.hiservices-xpcservice` reports a connection
-error before renderer initialization. The GPU checks and menu/gameplay visual
-checks still need to run outside that sandbox.
+Both Metal GPU suites pass with desktop access and Metal API validation enabled.
+A 20-second native game launch reaches `GS_FRONTEND`, loads both frontend texture
+dictionaries, and shuts down cleanly on termination. Menu appearance, input, and
+gameplay still need visual and interactive checks.
+
+Sandboxed desktop launches can fail with a `com.apple.hiservices-xpcservice`
+connection error before renderer initialization. Use a normal macOS desktop
+terminal for runtime validation.
