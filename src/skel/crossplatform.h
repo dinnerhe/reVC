@@ -66,7 +66,7 @@ int _caserename(const char *old_filename, const char *new_filename);
 #define caserename _caserename
 #endif
 
-#if defined(RW_GL3)
+#if defined(RW_GL3) || defined(RW_METAL)
 typedef struct
 {
 #if defined(LIBRW_SDL2)

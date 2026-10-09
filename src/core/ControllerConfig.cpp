@@ -52,7 +52,7 @@ void CControllerConfigManager::MakeControllerActionsBlank()
 	}
 }
 
-#ifdef RW_GL3
+#if defined(RW_GL3) || defined(RW_METAL)
 int MapIdToButtonId(int mapId) {
 #ifndef LIBRW_SDL2
 	switch (mapId) {
@@ -146,7 +146,7 @@ int32 CControllerConfigManager::GetJoyButtonJustDown()
 		if (m_NewState.rgbButtons[i] & 0x80 && !(m_OldState.rgbButtons[i] & 0x80))
 			return i + 1;
 	}
-#elif defined RW_GL3
+#elif defined(RW_GL3) || defined(RW_METAL)
 	if (m_NewState.isGamepad) {
 		for (int32 i = 0; i < MAX_BUTTONS; i++) {
 			if (m_NewState.mappedButtons[i] && !(m_OldState.mappedButtons[i]))
@@ -2851,7 +2851,7 @@ void CControllerConfigManager::UpdateJoyButtonState(int32 padnumber)
 		else
 			m_aButtonStates[i] = false;
 	}
-#elif defined RW_GL3
+#elif defined(RW_GL3) || defined(RW_METAL)
 	if (m_NewState.isGamepad) {
 		for (int32 i = 0; i < MAX_BUTTONS; i++) {
 #ifndef LIBRW_SDL2

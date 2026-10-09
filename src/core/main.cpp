@@ -1110,6 +1110,8 @@ DisplayGameDebugText()
 		    "D3D9 "
 #elif defined RWLIBS
 		    "D3D8 "
+#elif defined RW_METAL
+		    "Metal "
 #elif defined RW_GL3
 		    "OpenGL "
 #endif
@@ -1579,7 +1581,7 @@ Idle(void *arg)
 	if(!FrontEndMenuManager.m_bMenuActive && TheCamera.GetScreenFadeStatus() != FADE_2)
 	{
 		// This is from SA, but it's nice for windowed mode
-#if defined(GTA_PC) && !defined(RW_GL3)
+#if defined(GTA_PC) && !defined(RW_GL3) && !defined(RW_METAL)
 		RwV2d pos;
 		pos.x = SCREEN_WIDTH / 2.0f;
 		pos.y = SCREEN_HEIGHT / 2.0f;

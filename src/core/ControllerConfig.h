@@ -109,7 +109,7 @@ class CControllerState;
 
 #define ACTIONNAME_LENGTH 40
 
-#ifdef RW_GL3
+#if defined(RW_GL3) || defined(RW_METAL)
 struct JoyState {
     int8 id;
     bool isGamepad;
@@ -135,7 +135,7 @@ public:
 	};
 
 	bool                  m_bFirstCapture;
-#if defined RW_GL3
+#if defined(RW_GL3) || defined(RW_METAL)
     JoyState              m_OldState;
     JoyState              m_NewState;
 #else
@@ -227,7 +227,7 @@ public:
 	void  ResetSettingOrder                   (e_ControllerAction action);
 };
 
-#ifndef RW_GL3
+#if !defined(RW_GL3) && !defined(RW_METAL)
 VALIDATE_SIZE(CControllerConfigManager, 0x143C);
 #endif
 

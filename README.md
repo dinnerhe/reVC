@@ -16,6 +16,8 @@ We cannot build for PS2 or Xbox yet. If you're interested in doing so, get in to
 
 ## Installation
 
+For the native macOS Metal backend, see [the Metal build and validation guide](README.metal.md).
+
 - reVC requires game assets to work, so you **must** own [a copy of GTA Vice City](https://store.steampowered.com/app/12110/Grand_Theft_Auto_Vice_City/).
 - Build reVC or download the latest build:
   - [Windows D3D9 MSS 32bit](https://nightly.link/mrxenginner/reVC/workflows/reVC_msvc_x86/miami/reVC_Release_win-x86-librw_d3d9-mss.zip)

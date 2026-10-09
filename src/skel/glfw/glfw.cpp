@@ -1,4 +1,4 @@
-#if defined RW_GL3 && !defined LIBRW_SDL2
+#if (defined RW_GL3 || defined RW_METAL) && !defined LIBRW_SDL2
 
 #ifdef _WIN32
 #include <shlobj.h>
@@ -224,9 +224,10 @@ psGrabScreen(RwCamera *pCamera)
 	}
 #else
 	rw::Image *image = RwCameraGetRaster(pCamera)->toImage();
-	image->removeMask();
-	if(image)
+	if(image){
+		image->removeMask();
 		return image;
+	}
 #endif
 	return nil;
 }
@@ -1057,7 +1058,12 @@ void psPostRWinit(void)
 	RwVideoMode vm;
 	RwEngineGetVideoModeInfo(&vm, GcurSelVM);
 
+#ifdef RW_METAL
+	// Metal scales the camera's logical dimensions to the Retina framebuffer.
+	glfwSetWindowSizeCallback(PSGLOBAL(window), resizeCB);
+#else
 	glfwSetFramebufferSizeCallback(PSGLOBAL(window), resizeCB);
+#endif
 #ifndef IGNORE_MOUSE_KEYBOARD
 #ifndef GET_KEYBOARD_INPUT_FROM_X11
 	glfwSetKeyCallback(PSGLOBAL(window), keypressCB);
@@ -1845,8 +1851,10 @@ cursorCB(GLFWwindow* window, double xpos, double ypos) {
 	
 	int winw, winh;
 	glfwGetWindowSize(PSGLOBAL(window), &winw, &winh);
-	FrontEndMenuManager.m_nMouseTempPosX = xpos * (RsGlobal.maximumWidth / winw);
-	FrontEndMenuManager.m_nMouseTempPosY = ypos * (RsGlobal.maximumHeight / winh);
+	if(winw > 0 && winh > 0){
+		FrontEndMenuManager.m_nMouseTempPosX = xpos * RsGlobal.maximumWidth / winw;
+		FrontEndMenuManager.m_nMouseTempPosY = ypos * RsGlobal.maximumHeight / winh;
+	}
 }
 
 void
