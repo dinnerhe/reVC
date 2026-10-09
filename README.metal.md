@@ -43,12 +43,18 @@ creates a copy using filesystem clones. From the same parent directory, with
 cp -cR "Grand Theft Auto Vice City" runtime-metal
 cp -R reVC/gamefiles/. runtime-metal/
 cd runtime-metal
-MTL_DEBUG_LAYER=1 ../reVC/build-metal/src/reVC
+env -u MTL_DEBUG_LAYER MTL_HUD_ENABLED=1 ../reVC/build-metal/src/reVC
 ```
 
 The overlay supplies reVC's fonts, frontend assets, text, and other gamefiles.
 Settings and any generated caches are written in the test directory. On a
 filesystem without cloning support, use `cp -R` for the initial copy.
+
+`MTL_HUD_ENABLED=1` enables [Apple's Metal performance HUD](https://developer.apple.com/documentation/xcode/monitoring-your-metal-apps-graphics-performance).
+API validation is separate: use `MTL_DEBUG_LAYER=1` while checking rendering
+correctness, and unset it for gameplay performance measurements. It has a large
+CPU cost in this renderer; the diagnostic launch command is unsuitable for FPS
+comparisons with an OpenGL release build.
 
 First confirm that menu text and textures render, mouse selection matches the
 cursor, and keyboard/controller navigation works. Start a new game, then check
@@ -77,9 +83,53 @@ macOS desktop terminal.
 The native Metal and OpenGL GLFW builds both compile and link successfully.
 Both Metal GPU suites pass with desktop access and Metal API validation enabled.
 A 20-second native game launch reaches `GS_FRONTEND`, loads both frontend texture
-dictionaries, and shuts down cleanly on termination. Menu appearance, input, and
-gameplay still need visual and interactive checks.
+dictionaries, and shuts down cleanly on termination. Matched gameplay captures
+against OpenGL verify fog colors and the circular radar mask. GPU regressions
+cover fog byte order, depth writes independent of testing, queued texture writes,
+and transient buffer lifetimes. Full interactive coverage of every game effect
+remains future work.
 
 Sandboxed desktop launches can fail with a `com.apple.hiservices-xpcservice`
 connection error before renderer initialization. Use a normal macOS desktop
 terminal for runtime validation.
+
+## Repeatable gameplay capture
+
+Configure with `-DREVC_RENDER_TESTS=ON` to enable the optional GLFW test harness.
+It has no effect unless `REVC_RENDER_TEST` is set. Run from a separate test game
+directory with a supported video mode:
+
+```sh
+env -u MTL_DEBUG_LAYER REVC_RENDER_TEST=game \
+  REVC_RENDER_TEST_FRAMES=360 \
+  REVC_RENDER_TEST_CAPTURE=/tmp/revc-metal-game.png \
+  /absolute/path/to/reVC/build-metal/src/reVC
+```
+
+The harness starts a new game through the frontend, fixes the clock at 22:20 and
+weather to sunny, disables optional custom effects for backend comparison, warms
+up for 120 gameplay frames, measures the requested number of frames, captures
+the framebuffer, and exits. It prints framebuffer resolution, average FPS,
+median/p95/max frame intervals. Use the included `freeroam_miami.scm` as
+`data/main.scm` in the test copy to avoid opening story cutscenes. Set
+`REVC_RENDER_TEST_TRAVEL=600` to traverse 600 game units along Y during the run
+and exercise streaming. `REVC_RENDER_TEST=menu` captures the menu after 60 frames.
+Framebuffer PNGs include the game HUD but omit Apple's overlay, which is added
+to the presented drawable.
+
+Measured smoke runs on Apple M2 (120 warmup frames, 360 measured frames):
+
+| Renderer / options | Framebuffer | Average FPS | p95 frame interval |
+| --- | --- | ---: | ---: |
+| Previous Metal, no validation | 1920×1200 | 120.0 | 8.77 ms |
+| Previous Metal, API validation only | 2560×1600 | 34.5 | 31.92 ms |
+| Previous Metal, API validation and HUD | 2560×1600 | 34.3 | 32.49 ms |
+| Updated Metal, API validation and HUD | 2560×1600 | 51.8 | 20.92 ms |
+| Updated Metal, Apple HUD, no validation | 2560×1600 | 120.0 | 8.78 ms |
+| Previous Metal, 600-unit streaming traversal | 1920×1200 | 119.6 | 9.28 ms |
+| Updated Metal, 600-unit streaming traversal | 1920×1200 | 119.9 | 9.00 ms |
+| OpenGL, no validation | 1920×1200 | 269.8 | 4.70 ms |
+
+These are short runs in one fixed-night gameplay scenario, not guarantees for
+every location or workload. These numbers measure application frame intervals;
+they do not establish the display refresh rate or GPU execution time.

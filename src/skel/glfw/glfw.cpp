@@ -51,6 +51,7 @@ long _dwOperatingSystemVersion;
 #include "AnimViewer.h"
 #include "Font.h"
 #include "MemoryMgr.h"
+#include "render_test.h"
 
 // This is defined on project-level, via premake5 or cmake
 #ifdef GET_KEYBOARD_INPUT_FROM_X11
@@ -205,6 +206,7 @@ psCameraShowRaster(RwCamera *camera)
 		RwCameraShowRaster(camera, PSGLOBAL(window), rwRASTERFLIPWAITVSYNC);
 	else
 		RwCameraShowRaster(camera, PSGLOBAL(window), rwRASTERFLIPDONTWAIT);
+	RenderTestFrame(camera);
 
 	return;
 }
@@ -1963,6 +1965,7 @@ main(int argc, char *argv[])
 	openParams.height = RsGlobal.maximumHeight;
 	openParams.windowtitle = RsGlobal.appName;
 	openParams.window = &PSGLOBAL(window);
+	RenderTestInit();
 	
 	ControlsManager.MakeControllerActionsBlank();
 	ControlsManager.InitDefaultControlConfiguration();

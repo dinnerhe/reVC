@@ -55,6 +55,11 @@ target_compile_definitions(${EXECUTABLE}
         CMAKE_NO_AUTOLINK
 )
 
+option(REVC_RENDER_TESTS "Enable opt-in automated GLFW rendering captures and frame timing" OFF)
+if(REVC_RENDER_TESTS)
+    target_compile_definitions(${EXECUTABLE} PRIVATE REVC_RENDER_TESTS)
+endif()
+
 if(LIBRW_PLATFORM_D3D9)
     target_compile_definitions(${EXECUTABLE}
         PUBLIC
